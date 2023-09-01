@@ -67,9 +67,9 @@ public class PlayerController : MonoBehaviour
 
         // Calculate shooting direction based on camera's facing direction
         Vector3 shootingDirection = Camera.main.transform.forward;
+        UnlockBall();
         ballRigidbody.AddForce(shootingDirection * shootPower, ForceMode.Impulse);
 
-        UnlockBall();
     }
 
     private void Pass()
@@ -78,9 +78,9 @@ public class PlayerController : MonoBehaviour
 
         // Calculate passing direction based on camera's facing direction
         Vector3 passDirection = Camera.main.transform.forward;
+        UnlockBall();
         ballRigidbody.AddForce(passDirection * passPower, ForceMode.Impulse);
 
-        UnlockBall();
     }
 
     private void UnlockBall()
