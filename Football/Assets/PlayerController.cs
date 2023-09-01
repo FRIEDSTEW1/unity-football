@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
     public float shootPower = 10.0f;
     public float passPower = 5.0f;
 
-    private bool isLocked = false;      // Flag to track whether the ball is locked
+    [SerializeField] public bool isLocked = false;      // Flag to track whether the ball is locked
     private Rigidbody ballRigidbody;    // Reference to the ball's rigidbody component
     private Vector3 initialOffset;      // Initial offset between player and ball
 
@@ -42,6 +42,10 @@ public class PlayerController : MonoBehaviour
             {
                 Pass();
             }
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                Lob();
+            }
         }
     }
 
@@ -66,10 +70,12 @@ public class PlayerController : MonoBehaviour
         Debug.Log("Shot taken");
 
         // Calculate shooting direction based on camera's facing direction
+
+        Vector3 upDirection = Camera.main.transform.up;
         Vector3 shootingDirection = Camera.main.transform.forward;
         UnlockBall();
         ballRigidbody.AddForce(shootingDirection * shootPower, ForceMode.Impulse);
-
+        ballRigidbody.AddForce(upDirection * shootPower, ForceMode.Impulse);
     }
 
     private void Pass()
@@ -82,6 +88,16 @@ public class PlayerController : MonoBehaviour
         ballRigidbody.AddForce(passDirection * passPower, ForceMode.Impulse);
 
     }
+    private void Lob()
+    {
+        Debug.Log("Log initiated");
+
+        Vector3 passDirection = Camera.main.transform.forward;
+        Vector3 upDirection = Camera.main.transform.up;
+        UnlockBall();
+        ballRigidbody.AddForce(passDirection * passPower, ForceMode.Impulse);
+        ballRigidbody.AddForce(upDirection * passPower, ForceMode.Impulse);
+    }
 
     private void UnlockBall()
     {
@@ -89,4 +105,5 @@ public class PlayerController : MonoBehaviour
         ballRigidbody.isKinematic = false;
         ball.transform.SetParent(null);
     }
+
 }

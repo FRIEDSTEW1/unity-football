@@ -18,7 +18,7 @@ using UnityEngine.Animations;
 public class FirstPersonController : MonoBehaviour
 {
     Animator animator;
-    
+    PlayerController PlayerController;
 
     private Rigidbody rb;
 
@@ -158,6 +158,7 @@ public class FirstPersonController : MonoBehaviour
     {
         player = GameObject.FindWithTag("Player");
         animator = player.GetComponent<Animator>();
+        PlayerController = GetComponent<PlayerController>();
         
         if(lockCursor)
         {
@@ -254,7 +255,7 @@ public class FirstPersonController : MonoBehaviour
 
             // Changes isZoomed when key is pressed
             // Behavior for hold to zoom
-            if(holdToZoom && !isSprinting)
+            if(holdToZoom && !isSprinting && !PlayerController.isLocked)
             {
                 if(Input.GetKeyDown(zoomKey))
                 {
