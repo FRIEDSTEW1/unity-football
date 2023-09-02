@@ -13,6 +13,10 @@ public class PlayerController : MonoBehaviour
     private Rigidbody ballRigidbody;    // Reference to the ball's rigidbody component
     private Vector3 initialOffset;      // Initial offset between player and ball
 
+    private float pressTime;
+    private bool buttonPressed;
+    private float holdTime;
+
     private void Start()
     {
         initialOffset = ball.transform.position - playerTransform.position;
@@ -20,9 +24,10 @@ public class PlayerController : MonoBehaviour
     }
 
     private void Update()
-    {
+    {   
         if (isLocked)
         {
+            SetPower();
             // Calculate the rotation based on the player's movement
             Vector3 playerVelocity = playerTransform.GetComponent<Rigidbody>().velocity;
             Vector3 rotationAxis = Vector3.Cross(Vector3.up, playerVelocity.normalized);
@@ -32,17 +37,17 @@ public class PlayerController : MonoBehaviour
             ball.transform.Rotate(rotationAxis, rotationAmount * Mathf.Rad2Deg, Space.World);
 
             // Shooting
-            if (Input.GetButtonDown("Shoot"))
+            if (Input.GetButtonUp("Shoot") || (holdTime == 1 && Input.GetButton("Shoot")))
             {
                 Shoot();
             }
 
             // Passing
-            if (Input.GetButtonDown("Pass"))
+            if (Input.GetButtonUp("Pass") || (holdTime == 1 && Input.GetButton("Pass")))
             {
                 Pass();
             }
-            if (Input.GetKeyDown(KeyCode.R))
+            if (Input.GetKeyUp(KeyCode.R) || (holdTime == 1 && Input.GetKey(KeyCode.R)))
             {
                 Lob();
             }
@@ -74,8 +79,9 @@ public class PlayerController : MonoBehaviour
         Vector3 upDirection = Camera.main.transform.up;
         Vector3 shootingDirection = Camera.main.transform.forward;
         UnlockBall();
-        ballRigidbody.AddForce(shootingDirection * shootPower, ForceMode.Impulse);
-        ballRigidbody.AddForce(upDirection * shootPower, ForceMode.Impulse);
+        ballRigidbody.AddForce(shootingDirection * holdTime * 10, ForceMode.Impulse);
+        ballRigidbody.AddForce(upDirection * holdTime * 10, ForceMode.Impulse);
+        holdTime = 0;
     }
 
     private void Pass()
@@ -85,7 +91,8 @@ public class PlayerController : MonoBehaviour
         // Calculate passing direction based on camera's facing direction
         Vector3 passDirection = Camera.main.transform.forward;
         UnlockBall();
-        ballRigidbody.AddForce(passDirection * passPower, ForceMode.Impulse);
+        ballRigidbody.AddForce(passDirection * holdTime * 5, ForceMode.Impulse);
+        holdTime = 0;
 
     }
     private void Lob()
@@ -95,8 +102,9 @@ public class PlayerController : MonoBehaviour
         Vector3 passDirection = Camera.main.transform.forward;
         Vector3 upDirection = Camera.main.transform.up;
         UnlockBall();
-        ballRigidbody.AddForce(passDirection * passPower, ForceMode.Impulse);
-        ballRigidbody.AddForce(upDirection * passPower, ForceMode.Impulse);
+        ballRigidbody.AddForce(passDirection * holdTime * 5, ForceMode.Impulse);
+        ballRigidbody.AddForce(upDirection * holdTime * 10, ForceMode.Impulse);
+        holdTime = 0;
     }
 
     private void UnlockBall()
@@ -106,4 +114,31 @@ public class PlayerController : MonoBehaviour
         ball.transform.SetParent(null);
     }
 
+
+    private void SetPower()
+    {
+        if (Input.GetButtonDown("Shoot") || (Input.GetButtonDown("Pass")) || (Input.GetKeyDown(KeyCode.R)))
+        {
+            
+            // Button pressed, record the time
+            pressTime = Time.time;
+            buttonPressed = true;
+        }
+
+        if (buttonPressed)
+        {
+            // Calculate how long the button has been held
+            holdTime = Time.time - pressTime;
+
+            // Limit the maximum hold time to 1 second
+            holdTime = Mathf.Clamp(holdTime, 0f, 1f);
+
+            if (Input.GetButtonUp("Shoot") || (Input.GetButtonUp("Pass")) || (Input.GetKeyUp(KeyCode.R)) || holdTime >= 1f)
+            {
+                // Button released or hold time exceeded 1 second
+                buttonPressed = false;
+                holdTime = 1f; // Set hold time to 1 second if exceeded
+            }
+        }
+    }
 }
