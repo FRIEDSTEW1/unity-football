@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
@@ -17,9 +18,15 @@ public class PlayerController : MonoBehaviour
     private bool buttonPressed;
     private float holdTime;
 
+
     private bool isShooting = false;
     private bool isPassing = false;
     private bool isLobbing = false;
+    bool canShoot;
+    bool canPass;
+    bool canLob;
+
+    string currentKick;
 
 
     private void Start()
@@ -33,18 +40,19 @@ public class PlayerController : MonoBehaviour
         if (isLocked)
         {
             SetPower();
+            //Debug.Log(holdTime +" : "+ canShoot );
 
-            if (Input.GetButtonUp("Shoot") || (holdTime == 1 && Input.GetButton("Shoot")))
+            if (holdTime == 1 && canShoot)
             {
                 isShooting = true;
             }
 
-            if (Input.GetButtonUp("Pass") || (holdTime == 1 && Input.GetButton("Pass")))
+            if (holdTime == 1 && canPass)
             {
                 isPassing = true;
             }
 
-            if (Input.GetKeyUp(KeyCode.R) || (holdTime == 1 && Input.GetKey(KeyCode.R)))
+            if (holdTime == 1 && canLob)
             {
                 isLobbing = true;
             }
@@ -68,6 +76,7 @@ public class PlayerController : MonoBehaviour
             {
                 Shoot();
                 isShooting = false;
+                canShoot = false;
             }
 
             // Passing
@@ -75,14 +84,57 @@ public class PlayerController : MonoBehaviour
             {
                 Pass();
                 isPassing = false;
+                canPass = false;
             }
             if (isLobbing == true)
             {
                 Lob();
                 isLobbing = false;
+                canLob = false;
             }
         }
     }
+
+    public void OnShoot(InputValue value)
+    {
+        if (value.isPressed)
+        {
+            canShoot = true;
+            currentKick = "shoot";
+        }
+        else if (canShoot)
+        {
+            canShoot = false;
+            isShooting = true;
+        }
+    }
+    public void OnPass(InputValue value)
+    {
+        if (value.isPressed)
+        {
+            canPass = true;
+            currentKick = "pass";
+        }
+        else if (canPass)
+        {
+            canPass = false;
+            isPassing = true;
+        }
+    }
+    public void OnLob(InputValue value)
+    {
+        if (value.isPressed)
+        {
+            canLob = true;
+            currentKick = "lob";
+        }
+        else if (canLob)
+        {
+            canLob = true;
+            isLobbing = true;
+        }
+    }
+
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -109,7 +161,8 @@ public class PlayerController : MonoBehaviour
         Vector3 upDirection = Camera.main.transform.up;
         Vector3 shootingDirection = Camera.main.transform.forward;
         UnlockBall();
-        Debug.Log(shootingDirection);
+
+        Debug.Log(holdTime);
         ballRigidbody.AddForce(shootingDirection * holdTime * 1500);
         ballRigidbody.AddForce(upDirection * holdTime * 1);
         holdTime = 0;
@@ -148,12 +201,14 @@ public class PlayerController : MonoBehaviour
 
     private void SetPower()
     {
-        if (Input.GetButtonDown("Shoot") || (Input.GetButtonDown("Pass")) || (Input.GetKeyDown(KeyCode.R)))
+        if ((canShoot || canPass || canLob) && !buttonPressed && holdTime == 0)
         {
-            
+
             // Button pressed, record the time
             pressTime = Time.time;
             buttonPressed = true;
+
+
         }
 
         if (buttonPressed)
@@ -164,11 +219,11 @@ public class PlayerController : MonoBehaviour
             // Limit the maximum hold time to 1 second
             holdTime = Mathf.Clamp(holdTime, 0f, 1f);
 
-            if (Input.GetButtonUp("Shoot") || (Input.GetButtonUp("Pass")) || (Input.GetKeyUp(KeyCode.R)) || holdTime >= 1f)
+            if ((!canShoot && currentKick == "shoot")|| !canPass && currentKick == "pass" || !canLob && currentKick == "lob" || holdTime >= 1f)
             {
                 // Button released or hold time exceeded 1 second
                 buttonPressed = false;
-                holdTime = 1f; // Set hold time to 1 second if exceeded
+                currentKick = "";
             }
         }
     }
