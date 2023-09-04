@@ -17,6 +17,11 @@ public class PlayerController : MonoBehaviour
     private bool buttonPressed;
     private float holdTime;
 
+    private bool isShooting = false;
+    private bool isPassing = false;
+    private bool isLobbing = false;
+
+
     private void Start()
     {
         initialOffset = ball.transform.position - playerTransform.position;
@@ -28,6 +33,28 @@ public class PlayerController : MonoBehaviour
         if (isLocked)
         {
             SetPower();
+
+            if (Input.GetButtonUp("Shoot") || (holdTime == 1 && Input.GetButton("Shoot")))
+            {
+                isShooting = true;
+            }
+
+            if (Input.GetButtonUp("Pass") || (holdTime == 1 && Input.GetButton("Pass")))
+            {
+                isPassing = true;
+            }
+
+            if (Input.GetKeyUp(KeyCode.R) || (holdTime == 1 && Input.GetKey(KeyCode.R)))
+            {
+                isLobbing = true;
+            }
+
+        }
+    }
+    private void FixedUpdate()
+    {
+        if (isLocked)
+        {
             // Calculate the rotation based on the player's movement
             Vector3 playerVelocity = playerTransform.GetComponent<Rigidbody>().velocity;
             Vector3 rotationAxis = Vector3.Cross(Vector3.up, playerVelocity.normalized);
@@ -37,19 +64,22 @@ public class PlayerController : MonoBehaviour
             ball.transform.Rotate(rotationAxis, rotationAmount * Mathf.Rad2Deg, Space.World);
 
             // Shooting
-            if (Input.GetButtonUp("Shoot") || (holdTime == 1 && Input.GetButton("Shoot")))
+            if (isShooting == true)
             {
                 Shoot();
+                isShooting = false;
             }
 
             // Passing
-            if (Input.GetButtonUp("Pass") || (holdTime == 1 && Input.GetButton("Pass")))
+            if (isPassing == true)
             {
                 Pass();
+                isPassing = false;
             }
-            if (Input.GetKeyUp(KeyCode.R) || (holdTime == 1 && Input.GetKey(KeyCode.R)))
+            if (isLobbing == true)
             {
                 Lob();
+                isLobbing = false;
             }
         }
     }
@@ -79,8 +109,9 @@ public class PlayerController : MonoBehaviour
         Vector3 upDirection = Camera.main.transform.up;
         Vector3 shootingDirection = Camera.main.transform.forward;
         UnlockBall();
-        ballRigidbody.AddForce(shootingDirection * holdTime * 10, ForceMode.Impulse);
-        ballRigidbody.AddForce(upDirection * holdTime * 10, ForceMode.Impulse);
+        Debug.Log(shootingDirection);
+        ballRigidbody.AddForce(shootingDirection * holdTime * 1500);
+        ballRigidbody.AddForce(upDirection * holdTime * 1);
         holdTime = 0;
     }
 
