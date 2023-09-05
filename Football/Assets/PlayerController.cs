@@ -30,8 +30,7 @@ public class PlayerController : MonoBehaviour
 
 
     private void Start()
-
-    {   ball = GameObject.Find("Ball");
+    {
         initialOffset = ball.transform.position - playerTransform.position;
         ballRigidbody = ball.GetComponent<Rigidbody>();
     }
