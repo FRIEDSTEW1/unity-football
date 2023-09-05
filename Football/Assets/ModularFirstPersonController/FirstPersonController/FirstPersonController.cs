@@ -111,6 +111,7 @@ public class FirstPersonController : MonoBehaviour
 
     // Internal Variables
     private Vector3 originalScale;
+    
 
     public bool enableHeadBob = true;
     public Transform joint;
@@ -158,7 +159,8 @@ public class FirstPersonController : MonoBehaviour
         }
         else
         {
-            crosshairObject.gameObject.SetActive(false);
+            
+
         }
 
         sprintBarCG = GetComponentInChildren<CanvasGroup>();
@@ -191,6 +193,7 @@ public class FirstPersonController : MonoBehaviour
     }
 
     float camRotation;
+
 
     private void Update()
     {
@@ -380,7 +383,7 @@ public class FirstPersonController : MonoBehaviour
 
                 if (hideBarWhenFull && sprintRemaining == sprintDuration)
                 {
-                    sprintBarCG.alpha -= 3 * Time.deltaTime;
+                    
                 }
                 targetVelocity = transform.TransformDirection(targetVelocity) * walkSpeed;
 
