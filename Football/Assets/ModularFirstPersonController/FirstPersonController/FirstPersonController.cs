@@ -142,6 +142,7 @@ public class FirstPersonController : MonoBehaviour
 
     void Start()
     {
+        ground = GameObject.Find("Ground");
         player = GameObject.FindWithTag("Player");
         animator = player.GetComponent<Animator>();
         PlayerController = GetComponent<PlayerController>();
@@ -153,8 +154,7 @@ public class FirstPersonController : MonoBehaviour
 
         if(crosshair)
         {
-            crosshairObject.sprite = crosshairImage;
-            crosshairObject.color = crosshairColor;
+            
         }
         else
         {
@@ -366,7 +366,7 @@ public class FirstPersonController : MonoBehaviour
 
                     if (hideBarWhenFull && !unlimitedSprint)
                     {
-                        sprintBarCG.alpha += 5 * Time.deltaTime;
+                        
                     }
                 }
 
@@ -380,7 +380,7 @@ public class FirstPersonController : MonoBehaviour
 
                 if (hideBarWhenFull && sprintRemaining == sprintDuration)
                 {
-                    sprintBarCG.alpha -= 3 * Time.deltaTime;
+                   
                 }
                 targetVelocity = transform.TransformDirection(targetVelocity) * walkSpeed;
 

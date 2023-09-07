@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-
-public class PlayerController : MonoBehaviour
+using Photon.Pun;
+public class PlayerController : MonoBehaviourPun
 {
     public Transform playerTransform;   // Player's transform
     public GameObject ball;             // The ball GameObject
@@ -18,7 +18,6 @@ public class PlayerController : MonoBehaviour
     private bool buttonPressed;
     private float holdTime;
 
-
     private bool isShooting = false;
     private bool isPassing = false;
     private bool isLobbing = false;
@@ -26,11 +25,17 @@ public class PlayerController : MonoBehaviour
     bool canPass;
     bool canLob;
 
+    private PhotonView ballview;
+    private PhotonView pView;
+
     string currentKick;
 
 
     private void Start()
     {
+        pView = GetComponent<PhotonView>();
+        ball = GameObject.Find("Ball(Clone)");
+        ballview = ball.GetComponent<PhotonView>();
         initialOffset = ball.transform.position - playerTransform.position;
         ballRigidbody = ball.GetComponent<Rigidbody>();
     }
@@ -39,6 +44,10 @@ public class PlayerController : MonoBehaviour
     {   
         if (isLocked)
         {
+            if (ball.transform.localPosition != positionOffset)
+            {
+                ball.transform.localPosition = positionOffset;
+            }
             SetPower();
             //Debug.Log(holdTime +" : "+ canShoot );
 
@@ -140,16 +149,32 @@ public class PlayerController : MonoBehaviour
     {
         if (!isLocked && collision.gameObject == ball)
         {
+
             LockBall();
         }
     }
-
     private void LockBall()
     {
+        
         isLocked = true;
+      
         ballRigidbody.isKinematic = true;
         ball.transform.SetParent(playerTransform);
-        ball.transform.localPosition = positionOffset; // Apply the offset
+        ball.transform.localPosition = positionOffset;
+        // Check if this player is the owner of the ball's PhotonView
+        if (photonView.IsMine)
+        {
+           
+
+            if (ballview != null && ballview.Owner != PhotonNetwork.LocalPlayer)
+            {
+                ballview.RequestOwnership();
+            }
+
+     
+        }
+
+        // Apply the offset
     }
 
     private void Shoot()
