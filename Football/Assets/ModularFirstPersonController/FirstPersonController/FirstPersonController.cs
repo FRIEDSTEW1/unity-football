@@ -10,13 +10,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Animations;
 using UnityEngine.InputSystem;
+using Photon.Pun;
 
 #if UNITY_EDITOR
     using UnityEditor;
     using System.Net;
 #endif
 
-public class FirstPersonController : MonoBehaviour
+public class FirstPersonController : MonoBehaviourPun
 {
     Animator animator;
     PlayerController PlayerController;
@@ -120,8 +121,8 @@ public class FirstPersonController : MonoBehaviour
     // Internal Variables
     private Vector3 jointOriginalPos;
     private float timer = 0;
-
-
+    private bool IsMine;
+    private PhotonView pView;
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -142,11 +143,21 @@ public class FirstPersonController : MonoBehaviour
 
     void Start()
     {
+        pView = GetComponent<PhotonView>();
         ground = GameObject.Find("Ground");
         player = GameObject.FindWithTag("Player");
         animator = player.GetComponent<Animator>();
         PlayerController = GetComponent<PlayerController>();
-        
+
+        if (pView.IsMine)
+        {
+            animator.SetBool(Animator.StringToHash("ismine"), true);
+        }
+        else if (!pView.IsMine)
+        {
+            animator.SetBool(Animator.StringToHash("ismine"), false);
+        }
+
         if(lockCursor)
         {
             Cursor.lockState = CursorLockMode.Locked;
@@ -194,7 +205,7 @@ public class FirstPersonController : MonoBehaviour
 
     private void Update()
     {
-
+     
         // Control camera movement
         if(cameraCanMove)
         {

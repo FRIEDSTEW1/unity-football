@@ -1,15 +1,19 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using Photon.Pun;
+using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviourPun
 {
     public Transform playerTransform;   // Player's transform
     public GameObject ball;             // The ball GameObject
     public Vector3 positionOffset;      // Offset for attaching the ball
     public float rotationSpeedMultiplier = 2.0f; // Adjust this value for faster rotation
-    public float shootPower = 10.0f;
+    public float shootPower = 1500.0f;
     public float passPower = 5.0f;
-
+    public float lobUp = 20f;
+    public float shootUp = 20f;
+    public float maxKickForce = 10.0f;
+    public float spinFactor = 1.0f;
+    
     [SerializeField] public bool isLocked = false;      // Flag to track whether the ball is locked
     private Rigidbody ballRigidbody;    // Reference to the ball's rigidbody component
     private Vector3 initialOffset;      // Initial offset between player and ball
@@ -28,11 +32,14 @@ public class PlayerController : MonoBehaviourPun
     private PhotonView ballview;
     private PhotonView pView;
 
-    string currentKick;
+    public Animator animator;
 
+    string currentKick;
+    public float unlockVelocityThreshold = 11.5f; // Adjust this value for the velocity threshold
 
     private void Start()
     {
+        
         pView = GetComponent<PhotonView>();
         ball = GameObject.Find("Ball(Clone)");
         ballview = ball.GetComponent<PhotonView>();
@@ -40,8 +47,10 @@ public class PlayerController : MonoBehaviourPun
         ballRigidbody = ball.GetComponent<Rigidbody>();
     }
 
+    
+
     private void Update()
-    {   
+    {
         if (isLocked)
         {
             if (ball.transform.localPosition != positionOffset)
@@ -49,24 +58,61 @@ public class PlayerController : MonoBehaviourPun
                 ball.transform.localPosition = positionOffset;
             }
             SetPower();
-            //Debug.Log(holdTime +" : "+ canShoot );
 
-            if (holdTime == 1 && canShoot)
+            // Check player velocity
+            float playerVelocityMagnitude = playerTransform.GetComponent<Rigidbody>().velocity.magnitude;
+            Debug.Log(playerVelocityMagnitude);
+
+            if (playerVelocityMagnitude >= unlockVelocityThreshold)
             {
-                isShooting = true;
+                // Player is moving at or above the velocity threshold, unlock and kick the ball
+                UnlockAndKickBall(playerVelocityMagnitude);
             }
-
-            if (holdTime == 1 && canPass)
+            else
             {
-                isPassing = true;
-            }
+                // Player is not moving fast enough, continue normal behavior
+                if (holdTime == 1 && canShoot)
+                {
+                    isShooting = true;
+                }
 
-            if (holdTime == 1 && canLob)
-            {
-                isLobbing = true;
-            }
+                if (holdTime == 1 && canPass)
+                {
+                    isPassing = true;
+                }
 
+                if (holdTime == 1 && canLob)
+                {
+                    isLobbing = true;
+                }
+            }
         }
+    }
+
+    private void UnlockAndKickBall(float playerVelocityMagnitude)
+    {
+        isLocked = false;
+        ballRigidbody.isKinematic = false;
+        ball.transform.SetParent(null);
+
+        // Calculate the kick direction based on player velocity
+        Vector3 kickDirection = playerTransform.forward;
+
+        // Calculate a dynamic force multiplier based on player velocity
+        float forceMultiplier = Mathf.Clamp(playerVelocityMagnitude / unlockVelocityThreshold, 0f, 1f);
+
+        // Adjust the kick force based on the dynamic multiplier and the max kick force
+        float adjustedKickForce = forceMultiplier * maxKickForce;
+
+        // Apply the kick force to the ball
+        ballRigidbody.AddForce(kickDirection * adjustedKickForce, ForceMode.Impulse);
+
+        // Reset the hold time and button pressed flag
+        holdTime = 0;
+        buttonPressed = false;
+
+        // Reset currentKick to empty
+        currentKick = "";
     }
     private void FixedUpdate()
     {
@@ -83,6 +129,7 @@ public class PlayerController : MonoBehaviourPun
             // Shooting
             if (isShooting == true)
             {
+                
                 Shoot();
                 isShooting = false;
                 canShoot = false;
@@ -91,13 +138,16 @@ public class PlayerController : MonoBehaviourPun
             // Passing
             if (isPassing == true)
             {
+                
                 Pass();
                 isPassing = false;
                 canPass = false;
             }
             if (isLobbing == true)
             {
+                
                 Lob();
+
                 isLobbing = false;
                 canLob = false;
             }
@@ -136,6 +186,7 @@ public class PlayerController : MonoBehaviourPun
         {
             canLob = true;
             currentKick = "lob";
+            
         }
         else if (canLob)
         {
@@ -149,7 +200,7 @@ public class PlayerController : MonoBehaviourPun
     {
         if (!isLocked && collision.gameObject == ball)
         {
-
+           
             LockBall();
         }
     }
@@ -177,21 +228,23 @@ public class PlayerController : MonoBehaviourPun
         // Apply the offset
     }
 
-    private void Shoot()
-    {
-        Debug.Log("Shot taken");
+   private void Shoot()
+{
+    Debug.Log("Shot taken");
 
-        // Calculate shooting direction based on camera's facing direction
+        Debug.Log("Shoot initiated");
 
+        Vector3 shootDirection = Camera.main.transform.forward;
         Vector3 upDirection = Camera.main.transform.up;
-        Vector3 shootingDirection = Camera.main.transform.forward;
+        animator.SetTrigger(Animator.StringToHash("Lobbing"));
         UnlockBall();
-
-        Debug.Log(holdTime);
-        ballRigidbody.AddForce(shootingDirection * holdTime * 1500);
-        ballRigidbody.AddForce(upDirection * holdTime * 1);
+        ballRigidbody.AddForce(shootDirection * holdTime * shootPower, ForceMode.Impulse);
         holdTime = 0;
     }
+
+
+
+
 
     private void Pass()
     {
@@ -199,8 +252,9 @@ public class PlayerController : MonoBehaviourPun
 
         // Calculate passing direction based on camera's facing direction
         Vector3 passDirection = Camera.main.transform.forward;
+        animator.SetTrigger(Animator.StringToHash("Passing"));
         UnlockBall();
-        ballRigidbody.AddForce(passDirection * holdTime * 5, ForceMode.Impulse);
+        ballRigidbody.AddForce(passDirection * holdTime * passPower, ForceMode.Impulse);
         holdTime = 0;
 
     }
@@ -210,9 +264,10 @@ public class PlayerController : MonoBehaviourPun
 
         Vector3 passDirection = Camera.main.transform.forward;
         Vector3 upDirection = Camera.main.transform.up;
+        animator.SetTrigger(Animator.StringToHash("Lobbing"));
         UnlockBall();
-        ballRigidbody.AddForce(passDirection * holdTime * 5, ForceMode.Impulse);
-        ballRigidbody.AddForce(upDirection * holdTime * 10, ForceMode.Impulse);
+        ballRigidbody.AddForce(passDirection * holdTime * passPower, ForceMode.Impulse);
+        ballRigidbody.AddForce(upDirection * holdTime * lobUp, ForceMode.Impulse);
         holdTime = 0;
     }
 

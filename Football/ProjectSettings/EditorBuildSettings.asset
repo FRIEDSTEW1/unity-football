@@ -5,10 +5,10 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/OutdoorsScene.unity
-    guid: 8124e5870f4fd4c779e7a5f994e84ad1
   - enabled: 1
-    path: Assets/ModularFirstPersonController/DemoScene/Demo.unity
-    guid: 9fc0d4010bbf28b4594072e72b8655ab
+    path: Assets/FootballGameEngine(Indie)/Scenes/MainScene.unity
+    guid: df3519fea21cad940b6f3020f14857fe
+  - enabled: 1
+    path: Assets/FootballGameEngine(Indie)/Scenes/PCVersion/GameOnScene.unity
+    guid: b3b153902959a374aa7a495a600aab05
   m_configObjects: {}

@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 7919929598321809991}
   - component: {fileID: 5840028342344007756}
   - component: {fileID: -2352342803221076631}
+  - component: {fileID: -3320202559210496634}
   m_Layer: 0
   m_Name: Ball
   m_TagString: Ball
@@ -95,7 +96,7 @@ SphereCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5404548179970992412}
-  m_Material: {fileID: 13400000, guid: 5db407a972550d842a82579ffbc5ab94, type: 2}
+  m_Material: {fileID: 13400000, guid: 80835a6686f97f84faacbf56f6006283, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -109,9 +110,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5404548179970992412}
   serializedVersion: 2
-  m_Mass: 0.43
-  m_Drag: 0.01
-  m_AngularDrag: 0.01
+  m_Mass: 0.45
+  m_Drag: 0
+  m_AngularDrag: 0
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
@@ -191,3 +192,21 @@ MonoBehaviour:
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &-3320202559210496634
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5404548179970992412}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c9a83e8d4036854589856804e082db7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ballRadius: 0.11
+  mass: 0.45
+  airDensity: 1.225
+  dragCoefficient: 0.47
+  spinFactor: 1
+  restitution: 0.8
