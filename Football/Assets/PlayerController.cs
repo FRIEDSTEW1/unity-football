@@ -15,7 +15,8 @@ public class PlayerController : MonoBehaviourPun
     public float spinFactor = 1.0f;
     
     [SerializeField] public bool isLocked = false;      // Flag to track whether the ball is locked
-    private Rigidbody ballRigidbody;    // Reference to the ball's rigidbody component
+    private Rigidbody ballRigidbody;// Reference to the ball's rigidbody component
+    public Rigidbody playerRigidbody;
     private Vector3 initialOffset;      // Initial offset between player and ball
 
     private float pressTime;
@@ -28,6 +29,9 @@ public class PlayerController : MonoBehaviourPun
     bool canShoot;
     bool canPass;
     bool canLob;
+    bool canCurveLeft;
+    bool canCurveRight;
+    public BallPhysics bp;
 
     private PhotonView ballview;
     private PhotonView pView;
@@ -36,6 +40,7 @@ public class PlayerController : MonoBehaviourPun
 
     string currentKick;
     public float unlockVelocityThreshold = 11.5f; // Adjust this value for the velocity threshold
+    public float kickBackDamping = 0.75f;
 
     private void Start()
     {
@@ -43,6 +48,7 @@ public class PlayerController : MonoBehaviourPun
         pView = GetComponent<PhotonView>();
         ball = GameObject.Find("Ball(Clone)");
         ballview = ball.GetComponent<PhotonView>();
+        bp = ball.GetComponent<BallPhysics>();
         initialOffset = ball.transform.position - playerTransform.position;
         ballRigidbody = ball.GetComponent<Rigidbody>();
     }
@@ -94,6 +100,9 @@ public class PlayerController : MonoBehaviourPun
         isLocked = false;
         ballRigidbody.isKinematic = false;
         ball.transform.SetParent(null);
+        
+       
+
 
         // Calculate the kick direction based on player velocity
         Vector3 kickDirection = playerTransform.forward;
@@ -105,12 +114,15 @@ public class PlayerController : MonoBehaviourPun
         float adjustedKickForce = forceMultiplier * maxKickForce;
 
         // Apply the kick force to the ball
-        ballRigidbody.AddForce(kickDirection * adjustedKickForce, ForceMode.Impulse);
+        playerRigidbody.AddForce(-playerTransform.up * adjustedKickForce, ForceMode.Impulse);
+        ballRigidbody.AddForce(kickDirection * adjustedKickForce * kickBackDamping, ForceMode.Impulse);
+        
+ 
 
         // Reset the hold time and button pressed flag
         holdTime = 0;
         buttonPressed = false;
-
+        
         // Reset currentKick to empty
         currentKick = "";
     }
@@ -194,13 +206,35 @@ public class PlayerController : MonoBehaviourPun
             isLobbing = true;
         }
     }
+    public void OnCurveRight(InputValue value)
+    {
+        if (value.isPressed)
+        {
+            canCurveRight = true;
+        }
+        else
+        {
+            canCurveRight = false;
+        }
+    }
+    public void OnCurveLeft(InputValue value)
+    {
+        if (value.isPressed)
+        {
+            canCurveLeft = true;
+        }
+        else
+        {
+            canCurveLeft = false;
 
+        }
+    }
 
-    private void OnCollisionEnter(Collision collision)
+            private void OnCollisionEnter(Collision collision)
     {
         if (!isLocked && collision.gameObject == ball)
         {
-           
+            playerRigidbody.AddForce(-playerTransform.up * 10, ForceMode.Force);
             LockBall();
         }
     }
@@ -234,11 +268,27 @@ public class PlayerController : MonoBehaviourPun
 
         Debug.Log("Shoot initiated");
 
-        Vector3 shootDirection = Camera.main.transform.forward;
-        Vector3 upDirection = Camera.main.transform.up;
-        animator.SetTrigger(Animator.StringToHash("Lobbing"));
+        Vector3 shootDirection = playerTransform.forward;
+        Vector3 upDirection = playerTransform.up;
+        animator.SetTrigger(Animator.StringToHash("Shooting"));
         UnlockBall();
+        ballRigidbody.AddForce(upDirection * holdTime * shootUp, ForceMode.Impulse);
         ballRigidbody.AddForce(shootDirection * holdTime * shootPower, ForceMode.Impulse);
+        if (canCurveLeft)
+        {
+            bp.ActivateCurve(playerTransform.right);
+            ballRigidbody.AddTorque(playerTransform.right * spinFactor);
+        }
+        else if (canCurveRight)
+        {
+            bp.ActivateCurve(-playerTransform.right);
+            ballRigidbody.AddTorque(-playerTransform.right * spinFactor);
+        }
+        else
+        {
+            ballRigidbody.AddTorque(playerTransform.up * spinFactor);
+        }
+        
         holdTime = 0;
     }
 

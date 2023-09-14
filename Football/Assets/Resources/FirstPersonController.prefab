@@ -798,17 +798,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerTransform: {fileID: 5900788454483966153}
   ball: {fileID: 5404548179970992412, guid: 8df174e4d6e3f464b8f4fa85e692cadc, type: 3}
-  positionOffset: {x: 0, y: -0.55, z: 0.5}
+  positionOffset: {x: 0, y: -0.65, z: 0.5}
   rotationSpeedMultiplier: 2
-  shootPower: 400
+  shootPower: 200
   passPower: 5
   lobUp: 10
-  shootUp: 100
-  maxKickForce: 10
-  spinFactor: 1
+  shootUp: 50
+  maxKickForce: 12
+  spinFactor: 50
   isLocked: 0
+  playerRigidbody: {fileID: 5900788454483966158}
+  bp: {fileID: 0}
   animator: {fileID: 4956356229061471939}
   unlockVelocityThreshold: 11
+  kickBackDamping: 1.3
 --- !u!114 &1558832693059534801
 MonoBehaviour:
   m_ObjectHideFlags: 0
