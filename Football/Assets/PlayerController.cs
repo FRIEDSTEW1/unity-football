@@ -36,15 +36,15 @@ public class PlayerController : MonoBehaviourPun
     private PhotonView ballview;
     private PhotonView pView;
 
-    public Animator animator;
-
+    private Animator animator;
+    
     string currentKick;
     public float unlockVelocityThreshold = 11.5f; // Adjust this value for the velocity threshold
     public float kickBackDamping = 0.75f;
 
     private void Start()
     {
-        
+        animator = GetComponentInChildren<Animator>();
         pView = GetComponent<PhotonView>();
         ball = GameObject.Find("Ball(Clone)");
         ballview = ball.GetComponent<PhotonView>();
@@ -57,6 +57,15 @@ public class PlayerController : MonoBehaviourPun
 
     private void Update()
     {
+        if(animator != null)
+        {
+            Debug.Log("Animator Not null", animator);
+
+        }
+        else
+        {
+            Debug.Log("Animator is null");
+        }
         if (isLocked)
         {
             if (ball.transform.localPosition != positionOffset)
@@ -240,7 +249,11 @@ public class PlayerController : MonoBehaviourPun
     }
     private void LockBall()
     {
-        
+        float playerVelocityMagnitude = playerTransform.GetComponent<Rigidbody>().velocity.magnitude;
+        if (playerVelocityMagnitude <= unlockVelocityThreshold)
+        {
+            animator.SetTrigger(Animator.StringToHash("Touching"));
+        }
         isLocked = true;
       
         ballRigidbody.isKinematic = true;

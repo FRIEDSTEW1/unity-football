@@ -808,7 +808,7 @@ MonoBehaviour:
   spinFactor: 50
   isLocked: 0
   playerRigidbody: {fileID: 5900788454483966158}
-  bp: {fileID: 0}
+  bp: {fileID: -3320202559210496634, guid: 8df174e4d6e3f464b8f4fa85e692cadc, type: 3}
   animator: {fileID: 4956356229061471939}
   unlockVelocityThreshold: 11
   kickBackDamping: 1.3

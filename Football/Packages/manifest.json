@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.soupday.cc3_unity_tools": "file:C:/Users/FYL/Desktop/cc_unity_tools_HDRP-1.5.2.HDRP12",
     "com.unity.burst": "1.8.8",
     "com.unity.collab-proxy": "1.17.0",
     "com.unity.collections": "1.5.1",

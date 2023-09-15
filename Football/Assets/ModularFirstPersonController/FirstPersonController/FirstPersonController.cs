@@ -247,7 +247,7 @@ public class FirstPersonController : MonoBehaviourPun
 
             // Changes isZoomed when key is pressed
             // Behavior for hold to zoom
-            if(holdToZoom && !isSprinting && !PlayerController.isLocked)
+              if(holdToZoom && !isSprinting && !PlayerController.isLocked)
             {
                 if(canZoom)
                 {
@@ -257,7 +257,7 @@ public class FirstPersonController : MonoBehaviourPun
                 {
                     isZoomed = false;
                 }
-            }
+            } 
 
             // Lerps camera.fieldOfView to allow for a smooth transistion
             if(isZoomed)
